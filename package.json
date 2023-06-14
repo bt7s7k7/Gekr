@@ -1,28 +1,30 @@
 {
     "name": "gekr",
     "version": "1.0.0",
-    "main": "index.js",
+    "description": "Generic parser library",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "author": "bt7s7k7",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bt7s7k7/Gekr.git"
+    },
+    "bugs": {
+        "url": "https://github.com/bt7s7k7/Gekr/issues"
+    },
+    "homepage": "https://github.com/bt7s7k7/Gekr#readme",
     "dependencies": {
-        "source-map-support": "^0.5.19"
+        "kompa": "^1.2.0"
     },
     "devDependencies": {
-        "nodemon": "^2.0.12",
-        "@types/node": "^14.14.22",
-        "@typescript-eslint/eslint-plugin": "^4.15.2",
-        "@typescript-eslint/parser": "^4.15.2",
-        "eslint": "^7.20.0",
-        "ts-node-dev": "^1.1.1",
-        "typescript": "^4.1.3",
-        "concurrently": "^6.2.0"
+        "@types/node": "^14.10.1",
+        "source-map-support": "^0.5.19",
+        "typescript": "^4.9.4",
+        "esbuild": "^0.17.13"
     },
     "scripts": {
-        "dev": "concurrently --raw --kill-others \"yarn watch\" \"yarn watch-run\"",
-        "watch": "tsc --watch --preserveWatchOutput --noEmitOnError",
-        "build": "tsc --preserveWatchOutput",
-        "watch-run": "nodemon --delay 1 -x \"node -r source-map-support/register --preserve-symlinks --inspect\" ./build/app/app.js",
-        "start": "node -r source-map-support/register --preserve-symlinks ./build/app/app.js",
-        "get-ucpem": "curl -L https://github.com/bt7s7k7/UCPeM/releases/latest/download/ucpem.js -o node_modules/.bin/ucpem",
-        "lint": "eslint ."
+        "build": "ucpem run build",
+        "deploy": ""
     }
 }

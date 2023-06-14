@@ -5,19 +5,15 @@
         "sourceMap": true,
         "strict": true,
         "lib": [
-            "ES2020"
+            "ESNext"
         ],
         "module": "CommonJS",
-        "outDir": "build",
-        "preserveSymlinks": true,
-        "useDefineForClassFields": false,
-        "typeRoots": [
-            "./node_modules/@types"
-        ],
-        "rootDir": "src"
+        "esModuleInterop": true,
+        "outDir": "dist",
+        "declaration": true,
+        "emitDeclarationOnly": true
     },
     "include": [
-        "src",
-        "test"
+        "src"
     ]
 }
