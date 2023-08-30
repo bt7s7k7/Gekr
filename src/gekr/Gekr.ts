@@ -28,9 +28,18 @@ export namespace Gekr {
         ) { }
     }
 
+    const DEFAULT_CALLBACK = (text: string) => text
+
     /** A range of characters in a document, used in {@link Diagnostic}. */
     export class Position {
-        public format(message: string | null = null, { short = false, indent = "" } = {}) {
+        public format(message: string | null = null, {
+            short = false, indent = "",
+            formatLocation = DEFAULT_CALLBACK,
+            formatLocationSegment = DEFAULT_CALLBACK,
+            formatPointer = DEFAULT_CALLBACK,
+            formatCode = DEFAULT_CALLBACK,
+            formatMessage = DEFAULT_CALLBACK
+        } = {}) {
             const offset = this.offset
             const code = this.document.content
 
@@ -54,7 +63,10 @@ export namespace Gekr {
             const line = code.slice(lineStart + 1 + tabOffset, lineEnd == -1 ? undefined : lineEnd)
             const pointer = repeatString(" ", columnNum - tabOffset) + (this.length > 1 ? repeatString("~", this.length) : "^")
 
-            return indent + this.document.path + ":" + (this.line + 1) + ":" + (columnNum + 1) + (message != null ? " - " + message : "") + (short ? "" : "\n" + indent + line + "\n" + indent + pointer)
+            return (
+                indent + formatLocation(formatLocationSegment(this.document.path) + ":" + formatLocationSegment((this.line + 1).toString()) + ":" + formatLocationSegment((columnNum + 1).toString())) +
+                formatMessage(message != null ? " - " + message : "") +
+                (short ? "" : "\n" + indent + formatCode(line) + "\n" + indent + formatPointer(pointer)))
         }
 
         constructor(
