@@ -1,6 +1,6 @@
 import { GenericParser } from "../comTypes/GenericParser"
 import { LinkedList } from "../comTypes/LinkedList"
-import { FilterBy } from "../comTypes/types"
+import { Constructor, FilterBy } from "../comTypes/types"
 import { isNumber, isWord, repeatString, reverseIndexOf, unreachable } from "../comTypes/util"
 
 function isWhitespace(v: string) {
@@ -359,6 +359,31 @@ export namespace Gekr {
                 new BlockBinding()
             ]
         ]
+    }
+
+    export function insertOperation(steps: ParserOperation[][], anchor: null | string | Constructor<ParserOperation>, operation: ParserOperation) {
+        if (anchor == null) {
+            steps.push([operation])
+            return
+        }
+
+        for (const step of steps) {
+            for (const operation of step) {
+                if (
+                    typeof anchor == "function" ? (
+                        operation instanceof anchor
+                    ) : (
+                        operation instanceof Operator
+                        && Operator.makeID(operation.token, operation.binding) == anchor
+                    )
+                ) {
+                    step.push(operation)
+                    return
+                }
+            }
+        }
+
+        throw new RangeError()
     }
 
     const parser = new GenericParser("", {
