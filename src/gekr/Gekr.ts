@@ -632,18 +632,22 @@ export namespace Gekr {
                     if (type == "bin") while (!parser.isDone() && (parser.getCurrent() == "1" || parser.getCurrent() == "0")) { src += parser.getCurrent(); parser.index++ }
 
                     if (type == "dec") {
-                        if (parser.consume(".")) {
-                            src += "."
-                            isDecimal = true
-                            while (!parser.isDone() && isNumber(parser.getCurrent())) { src += parser.getCurrent(); parser.index++ }
-                        }
+                        if (parser.getCurrent() == "." && !isNumber(parser.input, parser.index + 1)) {
+                            // Probably a member access, i.e. "58.toString", therefore stop parsing number
+                        } else {
+                            if (parser.consume(".")) {
+                                src += "."
+                                isDecimal = true
+                                while (!parser.isDone() && isNumber(parser.getCurrent())) { src += parser.getCurrent(); parser.index++ }
+                            }
 
-                        if (parser.consume("e") || parser.consume("E")) {
-                            src += "e"
-                            isDecimal = true
-                            if (parser.consume("+")) src += "+"
-                            else if (parser.consume("-")) src += "-"
-                            while (!parser.isDone() && isNumber(parser.getCurrent())) { src += parser.getCurrent(); parser.index++ }
+                            if (parser.consume("e") || parser.consume("E")) {
+                                src += "e"
+                                isDecimal = true
+                                if (parser.consume("+")) src += "+"
+                                else if (parser.consume("-")) src += "-"
+                                while (!parser.isDone() && isNumber(parser.getCurrent())) { src += parser.getCurrent(); parser.index++ }
+                            }
                         }
                     }
 
