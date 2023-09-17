@@ -32,6 +32,30 @@ export function parseDotenv<T extends object = Record<string, string>>(content: 
     return target
 }
 
+export function registerGekrChromeDevtoolsFormatters({ skipFilename = false } = {}) {
+    // @ts-ignore
+    window.devtoolsFormatters ??= []
+    // @ts-ignore
+    const index = window.devtoolsFormatters.findIndex(v => v.kind == "gekr-formatter")
+    // @ts-ignore
+    if (index != -1) window.devtoolsFormatters.splice(index, 1)
+    // @ts-ignore
+    window.devtoolsFormatters.push({
+        kind: "gekr-formatter",
+        header(obj: unknown) {
+            if (obj instanceof Gekr.Position) {
+                const format = obj.format()
+                const start = skipFilename ? format.indexOf("\n") + 1 : 0
+                return ["div", { style: "color: #57a7fd" }, format.slice(start)]
+            }
+            return null
+        },
+        hasBody() {
+            return false
+        }
+    })
+}
+
 type HighlightingTargets =
     | {
         target: "codemirror5",
