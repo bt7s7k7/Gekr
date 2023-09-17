@@ -655,6 +655,7 @@ export namespace Gekr {
                         : parseInt(src, type == "hex" ? 16 : 2)
 
                     pos.length = src.length
+                    if (type == "hex" || type == "bin") pos.length += 2
                     tokens.push({ kind: "number", value, pos })
                 } else if (parser.consume("\\\\")) {
                     const value = parser.readUntil((v, i) => v[i] == "\n" || v[i] == "\r")
