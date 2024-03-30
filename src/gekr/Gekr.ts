@@ -268,7 +268,7 @@ export namespace Gekr {
             if (specToken.kind == "block") {
                 block = iter.next
                 toDelete.push(block)
-            } else if (specToken.kind == "operator") {
+            } else if (specToken.kind == "operator" && specToken.token == ARROW_OPERATOR.token) {
                 if (iter.next.next == null) return null
                 const arrow = iter.next
                 block = iter.next.next
@@ -492,11 +492,21 @@ export namespace Gekr {
                             continue
                         }
 
-                        const id = Operator.makeID(token.token, binding)
-                        const operator = grammar.operatorLookup.get(id)
+                        let id = Operator.makeID(token.token, binding)
+                        let operator = grammar.operatorLookup.get(id)
                         if (operator == null || operator.presentence != i) {
-                            iter = iter.next
-                            continue
+                            if (binding == "infix" && iter.next!.value.kind == "separator") {
+                                binding = "postfix"
+                                id = Operator.makeID(token.token, binding)
+                                operator = grammar.operatorLookup.get(id)
+                                if (operator == null || operator.presentence != i) {
+                                    iter = iter.next
+                                    continue
+                                }
+                            } else {
+                                iter = iter.next
+                                continue
+                            }
                         }
 
                         let children
