@@ -90,9 +90,32 @@ export function generateGekrHighlighting(options: HighlightingOptions): any {
             ...options.overrideTokens
         }
 
+        function makeRegex(tokens: string[]) {
+            const normal: string[] = []
+            const withSymbolStart: string[] = []
+            const withSymbolEnd: string[] = []
+            const withSymbolBoth: string[] = []
+
+            for (const token of tokens) {
+                const symbolStart = !isWord(token, 0)
+                const symbolEnd = !isWord(token, token.length - 1)
+                if (!symbolStart && !symbolEnd) normal.push(token)
+                else if (symbolStart && !symbolEnd) withSymbolStart.push(token)
+                else if (!symbolStart && symbolEnd) withSymbolEnd.push(token)
+                else if (symbolStart && symbolEnd) withSymbolBoth.push(token)
+            }
+
+            return new RegExp(autoFilter([
+                normal.length > 0 && `\\b(?:${normal.join("|")})\\b`,
+                withSymbolStart.length > 0 && `(?:${withSymbolStart.join("|")})\\b`,
+                withSymbolEnd.length > 0 && `\\b(?:${withSymbolEnd.join("|")})`,
+                withSymbolBoth.length > 0 && `(?:${withSymbolBoth.join("|")})`,
+            ]).join("|"))
+        }
+
         const start = autoFilter([
-            keywords.length > 0 && { regex: new RegExp(`\\b(?:${keywords.join("|")})\\b`), token: tokens.keyword },
-            atoms.length > 0 && { regex: new RegExp(`\\b(?:${atoms.join("|")})\\b`), token: tokens.atom },
+            keywords.length > 0 && { regex: makeRegex(keywords), token: tokens.keyword },
+            atoms.length > 0 && { regex: makeRegex(atoms), token: tokens.atom },
             highlightNumbers && { regex: /0x[a-f\d]+|0b[10]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i, token: tokens.number },
             options.additionalTokens,
             { regex: /\/\/.*/, token: tokens.comment },
