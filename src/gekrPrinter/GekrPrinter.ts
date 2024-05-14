@@ -27,9 +27,9 @@ function _formatPosition(target: Gekr.Position | Gekr.Diagnostic, options: (Excl
     }
 
     if (target instanceof Gekr.Diagnostic) {
-        return FORMAT[error ? "black" : "primary"](target.format(options))
+        return FORMAT[error ? "white" : "primary"](target.format(options))
     } else {
-        return FORMAT[error ? "black" : "primary"](target.format(null, options))
+        return FORMAT[error ? "white" : "primary"](target.format(null, options))
     }
 }
 
