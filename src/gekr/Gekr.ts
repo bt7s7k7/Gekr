@@ -96,7 +96,7 @@ export namespace Gekr {
     export type Node =
         | Node.Root | Node.Block | Node.Group | Node.Tuple | Node.Ident
         | Node.Label | Node.String | Node.Number | Node.Format | Node.Operator
-        | Node.Separator | Node.LabelOperator | Node.Invocation
+        | Node.Separator | Node.LabelOperator | Node.Invocation | Node.Fish
 
     export namespace Node {
         interface NodeBase { pos: Position }
@@ -127,6 +127,8 @@ export namespace Gekr {
         export interface LabelOperator extends NodeBase { kind: "label_op", name: string }
         /** Represents a function or method invocation with arguments as children. */
         export interface Invocation extends NodeBase { kind: "invocation", target: Node, children: Node[], block: Node | null }
+        /** Represents a fish of tokens in angle brackets. */
+        export interface Fish extends NodeBase { kind: "fish", children: Node[] }
     }
 
     /** All syntax tree nodes that have children */
@@ -401,6 +403,8 @@ export namespace Gekr {
         operations: ParserOperation[][]
         /** Explicitly defined tokens. Used for constants like `true`. */
         definitions?: [string, DefinedNodeFactory][]
+        /** Should parse fish tokens (`ident<fish>`)? The support for this token is experimental and may not always work.  @default false */
+        experimentalFishSupport?: boolean
     }
 
     export class Grammar {
@@ -414,8 +418,12 @@ export namespace Gekr {
         public readonly operatorLookup = new Map<string, Operator>()
         /** All explicitly defined tokens registered, indexed by their token string. @see {@link GrammarOptions.definitions} */
         public readonly definitionLookup = new Map<string, DefinedNodeFactory>()
+        /** Should parse fish tokens (`ident<fish>`)? The support for this token is experimental and may not always work. */
+        public readonly experimentalFishSupport: boolean
 
         constructor(options: GrammarOptions) {
+            this.experimentalFishSupport = options.experimentalFishSupport ?? false
+
             this.passes = [] as ParserOperation[][]
             let i = 0
             for (const passInput of options.operations) {
@@ -638,6 +646,23 @@ export namespace Gekr {
                     continue
                 }
 
+                if (grammar.experimentalFishSupport && curr == "<") {
+                    const lastToken = tokens.end?.value
+                    if (lastToken?.kind == "ident") {
+                        const end = lastToken.pos.offset + lastToken.pos.length
+                        if (end == parser.index) {
+                            parser.index++
+                            tokens.push({ kind: "fish", children: parseBlock(">"), pos })
+                            continue
+                        }
+                    }
+                }
+
+                if (curr == term) {
+                    parser.index++
+                    return processTokens(tokens)
+                }
+
                 for (const operator of grammar.definedTokens) {
                     if (parser.consume(operator)) {
                         const define = grammar.definitionLookup.get(operator)
@@ -768,9 +793,6 @@ export namespace Gekr {
                     const word = parser.readWord()
                     pos.length = word.length
                     tokens.push({ kind: "ident", name: word, pos })
-                } else if (curr == term) {
-                    parser.index++
-                    return processTokens(tokens)
                 } else if (isWhitespace(curr)) {
                     parser.index++
                 } else if (curr == "\n") {
