@@ -8,6 +8,12 @@ project.prefix("src").res("gekr",
     github("bt7s7k7/CommonTypes").res("comTypes")
 )
 
+project.prefix("src").res("gekrPrinter",
+    project.ref("gekr"),
+    github("bt7s7k7/LogLib").res("prettyPrint"),
+    github("bt7s7k7/TextFormat").res("textFormatHTML")
+)
+
 project.script("build", async () => {
     const target = join(constants.projectPath, "./dist")
     await rm(join(target), { recursive: true })
