@@ -388,11 +388,11 @@ export namespace Gekr {
         throw new RangeError()
     }
 
-    const parser = new GenericParser("", {
-        readWord() {
+    const parser = new class extends GenericParser {
+        public readWord() {
             return this.readUntil((v, i) => !isWord(v, i))
         }
-    })
+    }("")
 
     /** Factory for nodes created by a custom defined token in {@link Grammar} */
     export type DefinedNodeFactory = (v: Position) => Node
